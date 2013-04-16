@@ -139,7 +139,9 @@ func (r *Registry) Dispatch(name string, args ...interface{}) {
 		handlers = r.callbacks[name]
 		dispatch = r.dispatch
 	}()
-	dispatch(handlers, args...)
+	if handlers != nil {
+		dispatch(handlers, args...)
+	}
 }
 
 // DispatchWithBehavior is the same as Dispatch, but it dispatches using the
@@ -156,7 +158,9 @@ func (r *Registry) DispatchWithBehavior(name string, behavior int, args ...inter
 		r.copyOnWrite[name] = true
 		handlers = r.callbacks[name]
 	}()
-	dispatch(handlers, args...)
+	if handlers != nil {
+		dispatch(handlers, args...)
+	}
 }
 
 func dispatchSerial(handlers *list.List, args ...interface{}) {
