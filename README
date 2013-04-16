@@ -1,0 +1,74 @@
+PACKAGE DOCUMENTATION
+
+package callback
+    import "github.com/kballard/gocallback/callback"
+
+    Package callback provides a mechanism for registering and dispatching
+    arbitrary callbacks.
+
+
+CONSTANTS
+
+const (
+    // Call handlers synchronously on the current goroutine
+    DispatchSerial = iota
+    // Call each handler on its own goroutine
+    DispatchParallel
+    // Call each handler on its own goroutine, but wait until all handlers
+    // have finished before returning.
+    DispatchParallelAndWait
+)
+    Various dispatch behaviors
+
+
+TYPES
+
+type CallbackIdentifier struct {
+    // contains filtered or unexported fields
+}
+
+
+
+type Registry struct {
+    // contains filtered or unexported fields
+}
+    A Registry keeps track of registered callbacks. Callbacks registered
+    with one Registry will not fire when another Registry is dispatched.
+
+
+func New(behavior int) *Registry
+    New returns a new *Registry. The passed behavior must be one of the
+    Dispatch* behavior constants.
+
+
+func (r *Registry) AddCallback(name string, f interface{}) CallbackIdentifier
+    AddCallback registers a callback function for a given name and returns
+    an identifier that can be used to remove the callback later. The
+    callback function is an interface{} but a runtime error will be thrown
+    if it is not a func with no return values.
+
+func (r *Registry) Clear()
+    Clear removes all callbacks.
+
+func (r *Registry) Dispatch(name string, args ...interface{})
+    Dispatch dispatches the given callback with the given args. If a
+    registered handler is incompatible with the args, a panic is thrown. The
+    rationale is the error lies in the code that registers the callback, not
+    the code that dispatches it, but the error can't be detected until
+    dispatch. This assumes, of course, that the same event isn't dispatched
+    with disparate argument types.
+
+    If a registered handler has too few arguments, it is only given the
+    arguments it can handle If it has too many arguments, the extra
+    arguments are zero-initialized.
+
+func (r *Registry) DispatchWithBehavior(name string, behavior int, args ...interface{})
+    DispatchWithBehavior is the same as Dispatch, but it dispatches using
+    the given behavior instead of the one provided to New().
+
+func (r *Registry) RemoveAllCallbacks(name string)
+    RemoveAllCallbacks removes all callbacks for the given name.
+
+func (r *Registry) RemoveCallback(ident CallbackIdentifier)
+    RemoveCallback removes a previously-registered callback function using
+    the identifier returned from AddCallback.
