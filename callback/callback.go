@@ -47,9 +47,9 @@ var dispatchers = map[int]func(*list.List, ...interface{}){
 	DispatchParallelAndWait: dispatchParallelAndWait,
 }
 
-// New returns a new *Registry.
+// NewRegistry returns a new *Registry.
 // The passed behavior must be one of the Dispatch* behavior constants.
-func New(behavior int) *Registry {
+func NewRegistry(behavior int) *Registry {
 	if dispatch, ok := dispatchers[behavior]; ok {
 		return &Registry{
 			copyOnWrite: make(map[string]bool),

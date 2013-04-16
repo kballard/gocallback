@@ -36,9 +36,9 @@ type Registry struct {
     with one Registry will not fire when another Registry is dispatched.
 
 
-func New(behavior int) *Registry
-    New returns a new *Registry. The passed behavior must be one of the
-    Dispatch* behavior constants.
+func NewRegistry(behavior int) *Registry
+    NewRegistry returns a new *Registry. The passed behavior must be one of
+    the Dispatch* behavior constants.
 
 
 func (r *Registry) AddCallback(name string, f interface{}) CallbackIdentifier
