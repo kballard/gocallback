@@ -129,7 +129,9 @@ func (r *Registry) Clear() {
 // If a registered handler has too few arguments, it is only given the
 // arguments it can handle If it has too many arguments, the extra arguments
 // are zero-initialized.
-func (r *Registry) Dispatch(name string, args ...interface{}) {
+//
+// The return value is true if any handlers were invoked, or false otherwise.
+func (r *Registry) Dispatch(name string, args ...interface{}) bool {
 	var handlers *list.List
 	var dispatch func(*list.List, ...interface{})
 	func() {
@@ -139,14 +141,16 @@ func (r *Registry) Dispatch(name string, args ...interface{}) {
 		handlers = r.callbacks[name]
 		dispatch = r.dispatch
 	}()
-	if handlers != nil {
+	if handlers != nil && handlers.Front() != nil {
 		dispatch(handlers, args...)
+		return true
 	}
+	return false
 }
 
 // DispatchWithBehavior is the same as Dispatch, but it dispatches using the
 // given behavior instead of the one provided to New().
-func (r *Registry) DispatchWithBehavior(name string, behavior int, args ...interface{}) {
+func (r *Registry) DispatchWithBehavior(name string, behavior int, args ...interface{}) bool {
 	dispatch, ok := dispatchers[behavior]
 	if !ok {
 		panic("unknown behavior")
@@ -158,9 +162,11 @@ func (r *Registry) DispatchWithBehavior(name string, behavior int, args ...inter
 		r.copyOnWrite[name] = true
 		handlers = r.callbacks[name]
 	}()
-	if handlers != nil {
+	if handlers != nil && handlers.Front() != nil {
 		dispatch(handlers, args...)
+		return true
 	}
+	return false
 }
 
 func dispatchSerial(handlers *list.List, args ...interface{}) {
